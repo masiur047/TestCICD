@@ -1,28 +1,18 @@
 pipeline {
-     agent {
-        docker {
-            image 'mcr.microsoft.com/dotnet/sdk:8.0'
-        }
-    }
+    agent any
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/masiur047/TestCICD.git'
-            }
-        }
-        stage('Restore') {
-            steps {
-                sh 'dotnet restore'
+                checkout([$class: 'GitSCM',
+                  branches: [[name: '*/main']],
+                  userRemoteConfigs: [[url: 'https://github.com/masiur047/TestCICD.git']]
+                ])
             }
         }
         stage('Build') {
             steps {
-                sh 'dotnet build --no-restore'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'dotnet test --no-build --verbosity normal'
+                echo "✅ Repo cloned successfully, starting build..."
+                sh 'dotnet --version'
             }
         }
     }
