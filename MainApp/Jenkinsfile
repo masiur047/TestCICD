@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     stages {
         stage('Checkout') {
             steps {
@@ -9,11 +10,40 @@ pipeline {
                 ])
             }
         }
+
+        stage('Restore') {
+            steps {
+                echo "🔄 Restoring NuGet packages..."
+                sh 'dotnet restore'
+            }
+        }
+
         stage('Build') {
             steps {
-                echo "✅ Repo cloned successfully, starting build..."
-                sh 'dotnet --version'
+                echo "🛠 Building the project..."
+                sh 'dotnet build --configuration Release'
             }
+        }
+
+        stage('Test') {
+            steps {
+                echo "✅ Running unit tests..."
+                sh 'dotnet test --logger trx --results-directory TestResults'
+            }
+        }
+
+        stage('Publish') {
+            steps {
+                echo "📦 Publishing the project..."
+                sh 'dotnet publish -c Release -o publish'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "📄 Archiving test results..."
+            junit 'TestResults/**/*.trx'
         }
     }
 }
