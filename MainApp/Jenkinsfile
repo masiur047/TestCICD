@@ -1,12 +1,18 @@
 pipeline {
     agent any
 
+    environment {
+        DOTNET_CLI_HOME = "${env.WORKSPACE}/.dotnet_home"
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout([$class: 'GitSCM',
                   branches: [[name: '*/main']],
-                  userRemoteConfigs: [[url: 'https://github.com/masiur047/TestCICD.git']]
+                  userRemoteConfigs: [[
+                      url: 'https://github.com/masiur047/TestCICD.git'
+                  ]]
                 ])
             }
         }
@@ -14,28 +20,29 @@ pipeline {
         stage('Restore') {
             steps {
                 echo "🔄 Restoring NuGet packages..."
-                sh 'dotnet restore'
+                sh 'dotnet restore MainApp/MainApp.csproj'
             }
         }
 
         stage('Build') {
             steps {
                 echo "🛠 Building the project..."
-                sh 'dotnet build --configuration Release'
+                sh 'dotnet build MainApp/MainApp.csproj --configuration Release'
             }
         }
 
         stage('Test') {
             steps {
-                echo "✅ Running unit tests..."
-                sh 'dotnet test --logger trx --results-directory TestResults'
+                echo "✅ Running tests..."
+                // Adjust if your test project is inside MainAppTests folder
+                sh 'dotnet test MainApp/MainApp.csproj --logger "trx;LogFileName=test-results.trx" --results-directory TestResults'
             }
         }
 
         stage('Publish') {
             steps {
                 echo "📦 Publishing the project..."
-                sh 'dotnet publish -c Release -o publish'
+                sh 'dotnet publish MainApp/MainApp.csproj --configuration Release -o publish'
             }
         }
     }
