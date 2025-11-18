@@ -20,14 +20,14 @@ pipeline {
         stage('Restore') {
             steps {
                 echo "🔄 Restoring NuGet packages..."
-                sh 'dotnet restore MainApp/MainApp.csproj'
+                sh 'dotnet restore MainApp/MyApp/MyApp.csproj'
             }
         }
 
         stage('Build') {
             steps {
                 echo "🛠 Building the project..."
-                sh 'dotnet build MainApp/MainApp.csproj --configuration Release'
+                sh 'dotnet build MainApp/MyApp/MyApp.csproj --configuration Release'
             }
         }
 
@@ -35,14 +35,14 @@ pipeline {
             steps {
                 echo "✅ Running tests..."
                 // Adjust if your test project is inside MainAppTests folder
-                sh 'dotnet test MainApp/MainApp.csproj --logger "trx;LogFileName=test-results.trx" --results-directory TestResults'
+                sh 'dotnet test MainApp/MyApp.Tests/MyApp.Tests.csproj --logger "trx;LogFileName=test-results.trx" --results-directory TestResults'
             }
         }
 
         stage('Publish') {
             steps {
                 echo "📦 Publishing the project..."
-                sh 'dotnet publish MainApp/MainApp.csproj --configuration Release -o publish'
+                sh 'dotnet publish MainApp/MyApp/MyApp.csproj --configuration Release -o publish'
             }
         }
     }
